@@ -1,7 +1,14 @@
 import telebot, PgAPI, logging
 from telebot import types
-from settings import API_TOKEN, LOG_LEVEL
+from settings import API_TOKEN
 
+logging.basicConfig(
+        filename="Riesling.log",
+        filemode="w",
+        format="%(asctime)s: [%(levelname)s] PID: %(process)d: %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        level=logging.INFO,
+    )
 bot = telebot.TeleBot(API_TOKEN)
 db = PgAPI.PgAPI()
 permission = None
@@ -70,28 +77,7 @@ def handle_text(message):
             inform = db.getLogInfo(30)
             bot.send_message(message.chat.id, text=inform)
 
-def setLogger(level=None):
-    llevel = logging.DEBUG
-    if level == "DEBUG":
-        llevel = logging.DEBUG
-    elif level == "INFO":
-        llevel = logging.INFO
-    elif level == "WARN":
-        llevel = logging.WARNING
-    elif level == "ERROR":
-        llevel = logging.ERROR
-    elif level == "CRITIC":
-        llevel = logging.CRITICAL
-
-    logging.basicConfig(
-        level=llevel,
-        filename="Riesling.log",
-        format="%(asctime)s: [%(levelname)s] PID: %(process)d: %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S"
-    )
-
 if __name__ == '__main__':
-    setLogger(LOG_LEVEL)
     bot.polling(none_stop=True, interval=0)
 
 
