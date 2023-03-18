@@ -1,3 +1,5 @@
+import datetime
+
 import telebot, PgAPI, logging
 from telebot import types
 from settings import API_TOKEN
@@ -31,10 +33,11 @@ def start(message):
         btn1 = types.KeyboardButton("Ордера")
         btn2 = types.KeyboardButton("Логи")
         btn3 = types.KeyboardButton("Пользователи")
-        markup.add(btn1, btn2, btn3)
+        btn4 = types.KeyboardButton("Пары")
+        markup.add(btn1, btn2, btn3, btn4)
         bot.send_message(message.chat.id, text="МЕНЮ: ".format(message.from_user), reply_markup=markup)
     else:
-        bot.send_message(message.chat.id, text="NO PERMISSION")
+        bot.send_message(message.chat.id, text=f"Пользователь {last_name} {first_name} добавлен")
 
 
 @bot.message_handler(content_types=['text'])
@@ -47,6 +50,14 @@ def handle_text(message):
             back = types.KeyboardButton("назад")
             markup.add(btn1, btn2, back)
             bot.send_message(message.chat.id, text="ВЫБЕРИТЕ ТИП ОРДЕРА", reply_markup=markup)
+
+    elif (message.text == "Пары"):
+        if db.getMemberPermission(message.chat.id) == 1000:
+            markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+            btn1 = types.KeyboardButton("eth_rur")
+            back = types.KeyboardButton("назад")
+            markup.add(btn1, back)
+            bot.send_message(message.chat.id, text="ВЫБЕРИТЕ ПАРУ", reply_markup=markup)
 
     elif (message.text == "CREATED"):
         if db.getMemberPermission(message.chat.id) == 1000:
@@ -64,7 +75,8 @@ def handle_text(message):
             btn1 = types.KeyboardButton("Ордера")
             btn2 = types.KeyboardButton("Логи")
             btn3 = types.KeyboardButton("Пользователи")
-            markup.add(btn1, btn2, btn3)
+            btn4 = types.KeyboardButton("Пары")
+            markup.add(btn1, btn2, btn3, btn4)
             bot.send_message(message.chat.id, text="МЕНЮ", reply_markup=markup)
 
     elif (message.text == "Пользователи"):
@@ -75,6 +87,22 @@ def handle_text(message):
     elif (message.text == "Логи"):
         if db.getMemberPermission(message.chat.id) == 1000:
             inform = db.getLogInfo(30)
+            bot.send_message(message.chat.id, text=inform)
+
+    elif (message.text == "eth_rur"):
+        if db.getMemberPermission(message.chat.id) == 1000:
+            pairs = db.getPairsInfo("eth_rur")
+            inform = ""
+            inform += f"{datetime.datetime.fromtimestamp(pairs[0][15])}\n" \
+                      f"SELL: ({pairs[0][11]}) {pairs[0][12]}\n" \
+                      f"BUY: ({pairs[0][13]}) {pairs[0][14]}\n" \
+                      f"\n" \
+                      f"MIN: {pairs[0][2]}\n" \
+                      f"MAX: {pairs[0][3]}\n" \
+                      f"LAST: {pairs[0][4]}\n" \
+                      f"\n" \
+                      f"BUY: {pairs[0][5]}\n" \
+                      f"SELL: {pairs[0][6]}"
             bot.send_message(message.chat.id, text=inform)
 
 if __name__ == '__main__':

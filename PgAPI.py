@@ -176,6 +176,11 @@ class PgAPI:
             text += "0 записей"
         return text
 
+    def getPairsInfo(self, pairs):
+        sql = f"SELECT * FROM pairs WHERE pairs ='{pairs}'"
+        return self.__tableSelect__(sql)
+
+
     def getLogInfo(self, deep):
         file = os.path.join(os.path.dirname(__file__), '..', 'YobitTrader', 'YobitTrader.log')
         content = open(file, "r")
