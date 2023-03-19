@@ -57,7 +57,9 @@ def start(message):
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn1 = types.KeyboardButton("BUY")
         btn2 = types.KeyboardButton("SELL")
-        markup.add(btn1, btn2)
+        btn3 = types.KeyboardButton("показатели")
+        btn4 = types.KeyboardButton("сброс")
+        markup.add(btn1, btn2, btn3, btn4)
         bot.send_message(message.chat.id, text="МОНИТОРИНГ: ".format(message.from_user), reply_markup=markup)
     else:
         bot.send_message(message.chat.id, text=f"Мониторинг не доступен")
@@ -143,6 +145,24 @@ def handle_text(message):
                       f"BUY: {pairs[0][5]}\n" \
                       f"SELL: {pairs[0][6]}"
             bot.send_message(message.chat.id, text=inform)
+
+    elif (message.text == "показатели"):
+        if db.getMemberPermission(message.chat.id) == 1000:
+            inform = "Нет показателей для отслеживания"
+            indicators = db.getMonitoring("eth_rur")
+            if indicators != []:
+                inform = ""
+                for indicator in indicators:
+                    inform += f"COIN: {indicator[1]}\n" \
+                              f"TYPE: {indicator[2]}\n" \
+                              f"PRICE: {indicator[3]}\n" \
+                              f"\n"
+            bot.send_message(message.chat.id, text=inform)
+
+    elif (message.text == "сброс"):
+        if db.getMemberPermission(message.chat.id) == 1000:
+            db.resetMonitoring()
+            bot.send_message(message.chat.id, text="Сброшены все показатели")
 
     elif (message.text == "BUY"):
         if db.getMemberPermission(message.chat.id) == 1000:

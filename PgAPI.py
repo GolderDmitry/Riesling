@@ -127,10 +127,13 @@ class PgAPI:
                 {price},
                 'NEW',
                 {int(time.time())}
-            );
-        """
+            );"""
         self.__tableInsert__(sql)
 
+    # Сброс статусов в таблице MONITORING
+    def resetMonitoring(self):
+        sql = f"UPDATE monitoring SET status = 'FINISH'"
+        self.__tableUpdate__(sql)
 
     def getMemberPermission(self, user_id):
         sql = f"SELECT permission FROM permission WHERE user_id = {user_id}"
