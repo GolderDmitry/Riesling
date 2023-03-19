@@ -11,9 +11,9 @@ logging.basicConfig(
         datefmt="%Y-%m-%d %H:%M:%S",
         level=logging.INFO,
     )
+
 bot = telebot.TeleBot(API_TOKEN)
 db = PgAPI.PgAPI()
-permission = None
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -31,17 +31,57 @@ def start(message):
     if db.getMemberPermission(message.chat.id) == 1000:
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
         btn1 = types.KeyboardButton("Ордера")
-        btn2 = types.KeyboardButton("Логи")
-        btn3 = types.KeyboardButton("Пользователи")
-        btn4 = types.KeyboardButton("Пары")
-        markup.add(btn1, btn2, btn3, btn4)
+        btn2 = types.KeyboardButton("Пользователи")
+        btn3 = types.KeyboardButton("Пары")
+        markup.add(btn1, btn2, btn3)
         bot.send_message(message.chat.id, text="МЕНЮ: ".format(message.from_user), reply_markup=markup)
     else:
         bot.send_message(message.chat.id, text=f"Пользователь {last_name} {first_name} добавлен")
 
+@bot.message_handler(commands=['server'])
+def start(message):
+    if db.getMemberPermission(message.chat.id) == 1000:
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        btn1 = types.KeyboardButton("Логи")
+        btn2 = types.KeyboardButton("STOP")
+        btn3 = types.KeyboardButton("START")
+        markup.add(btn1, btn2, btn3)
+        bot.send_message(message.chat.id, text="СЕРВЕР: ".format(message.from_user), reply_markup=markup)
+    else:
+        bot.send_message(message.chat.id, text=f"Серверные задачи не доступны")
+
+@bot.message_handler(commands=['monitoring'])
+def start(message):
+
+    if db.getMemberPermission(message.chat.id) == 1000:
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        btn1 = types.KeyboardButton("BUY")
+        btn2 = types.KeyboardButton("SELL")
+        markup.add(btn1, btn2)
+        bot.send_message(message.chat.id, text="МОНИТОРИНГ: ".format(message.from_user), reply_markup=markup)
+    else:
+        bot.send_message(message.chat.id, text=f"Мониторинг не доступен")
 
 @bot.message_handler(content_types=['text'])
 def handle_text(message):
+    if (db.status == 'BUY'):
+        if db.getMemberPermission(message.chat.id) == 1000:
+            try:
+                price = round(float(message.text), 8)
+                db.setMonitoring("eth_rur", "BUY", price)
+                db.status = 'WAIT'
+            except:
+                bot.send_message(message.chat.id, text=f"Неверный формат")
+
+    if (db.status == 'SELL'):
+        if db.getMemberPermission(message.chat.id) == 1000:
+            try:
+                price = round(float(message.text), 8)
+                db.setMonitoring("eth_rur", "SELL", price)
+                db.status = 'WAIT'
+            except:
+                bot.send_message(message.chat.id, text=f"Неверный формат")
+
     if (message.text == "Ордера"):
         if db.getMemberPermission(message.chat.id) == 1000:
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
@@ -73,10 +113,9 @@ def handle_text(message):
         if db.getMemberPermission(message.chat.id) == 1000:
             markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
             btn1 = types.KeyboardButton("Ордера")
-            btn2 = types.KeyboardButton("Логи")
-            btn3 = types.KeyboardButton("Пользователи")
-            btn4 = types.KeyboardButton("Пары")
-            markup.add(btn1, btn2, btn3, btn4)
+            btn2 = types.KeyboardButton("Пользователи")
+            btn3 = types.KeyboardButton("Пары")
+            markup.add(btn1, btn2, btn3)
             bot.send_message(message.chat.id, text="МЕНЮ", reply_markup=markup)
 
     elif (message.text == "Пользователи"):
@@ -104,6 +143,14 @@ def handle_text(message):
                       f"BUY: {pairs[0][5]}\n" \
                       f"SELL: {pairs[0][6]}"
             bot.send_message(message.chat.id, text=inform)
+
+    elif (message.text == "BUY"):
+        if db.getMemberPermission(message.chat.id) == 1000:
+             db.status = 'BUY'
+
+    elif (message.text == "SELL"):
+        if db.getMemberPermission(message.chat.id) == 1000:
+             db.status = 'SELL'
 
 if __name__ == '__main__':
     bot.polling(none_stop=True, interval=0)

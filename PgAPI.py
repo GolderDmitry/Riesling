@@ -7,6 +7,7 @@ from settings import DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, LOG_LEVEL
 class PgAPI:
 
     permission = None
+    status = None
 
     def __init__(self):
         self.connection = psycopg2.connect(
@@ -15,6 +16,7 @@ class PgAPI:
             password=DB_PASSWORD,
             host=DB_HOST)
         self._createPermissionTable()
+        self.status = 'WAIT'
 
     #Создание таблиц
     def __tableCreate__(self, sql):
@@ -109,6 +111,26 @@ class PgAPI:
                 )
                 """
         self.__tableInsert__(sql)
+
+    # Чтение таблицы MONITORING
+    def getMonitoring(self, pairs):
+        sql = f"SELECT * FROM monitoring WHERE pairs= '{pairs}' AND status = 'NEW'"
+        return self.__tableSelect__(sql)
+
+    # Установка в таблицу MONITORING
+    def setMonitoring(self, pairs, type, price):
+        sql = f"""
+            INSERT INTO monitoring (pairs, type, price, status, changed)
+            VALUES (
+                '{pairs}',
+                '{type}',
+                {price},
+                'NEW',
+                {int(time.time())}
+            );
+        """
+        self.__tableInsert__(sql)
+
 
     def getMemberPermission(self, user_id):
         sql = f"SELECT permission FROM permission WHERE user_id = {user_id}"
