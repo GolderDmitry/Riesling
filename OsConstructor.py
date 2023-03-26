@@ -32,6 +32,5 @@ class OsConstructor:
                 ['python3', 'main.py', '&'],
                 cwd='/home/YobitTrader')
                 #cwd='/Users/dgolder/Documents/_GIT_/YobitTrader')
-                cwd='/home/YobitTrader')
             code = return_value.returncode
         return code
