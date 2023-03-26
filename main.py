@@ -126,7 +126,7 @@ def handle_text(message):
     elif (message.text == "ПРОВЕРКА"):
         textOut = "Нет права на выполнение данной команды"
         if db.getMemberPermission(message.chat.id) == 1000:
-            if os.checkYobitTraiderProcess(535) == True:
+            if os.checkYobitTraiderProcess(db.getLastPid()) == True:
                 textOut = "YobitTrader РАБОТАЕТ"
             else:
                 textOut = "Процесс отсутствует"
@@ -135,7 +135,7 @@ def handle_text(message):
     elif (message.text == "RESTART"):
         textOut = "Нет права на выполнение данной команды"
         if db.getMemberPermission(message.chat.id) == 1000:
-            if os.restartYobitService(db.getLastPid()) == 0:
+            if os.restartYobitService(db.getLastPid()) is None:
                 textOut = "YobitTrader ПЕРЕЗАПУЩЕН"
             else:
                 textOut = "Перезапуск не требуется"
