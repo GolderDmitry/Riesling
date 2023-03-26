@@ -1,6 +1,6 @@
 import datetime
 
-import telebot, PgAPI, logging
+import telebot, PgAPI, logging, OsConstructor
 from telebot import types
 from settings import API_TOKEN
 
@@ -14,6 +14,8 @@ logging.basicConfig(
 
 bot = telebot.TeleBot(API_TOKEN)
 db = PgAPI.PgAPI()
+os = OsConstructor.OsConstructor()
+chat_id = 0
 
 @bot.message_handler(commands=['start'])
 def start(message):
@@ -41,10 +43,11 @@ def start(message):
 @bot.message_handler(commands=['server'])
 def start(message):
     if db.getMemberPermission(message.chat.id) == 1000:
+        chat_id = message.chat.id
         markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
-        btn1 = types.KeyboardButton("Логи")
-        btn2 = types.KeyboardButton("STOP")
-        btn3 = types.KeyboardButton("START")
+        btn1 = types.KeyboardButton("ЛОГИ")
+        btn2 = types.KeyboardButton("ПРОВЕРКА")
+        btn3 = types.KeyboardButton("RESTART")
         markup.add(btn1, btn2, btn3)
         bot.send_message(message.chat.id, text="СЕРВЕР: ".format(message.from_user), reply_markup=markup)
     else:
@@ -120,14 +123,34 @@ def handle_text(message):
             markup.add(btn1, btn2, btn3)
             bot.send_message(message.chat.id, text="МЕНЮ", reply_markup=markup)
 
+    elif (message.text == "ПРОВЕРКА"):
+        textOut = "Нет права на выполнение данной команды"
+        if db.getMemberPermission(message.chat.id) == 1000:
+            if os.checkYobitTraiderProcess(535) == True:
+                textOut = "YobitTrader РАБОТАЕТ"
+            else:
+                textOut = "Процесс отсутствует"
+        bot.send_message(message.chat.id, text=textOut)
+
+    elif (message.text == "RESTART"):
+        textOut = "Нет права на выполнение данной команды"
+        if db.getMemberPermission(message.chat.id) == 1000:
+            if os.restartYobitService(db.getLastPid()) == 0:
+                textOut = "YobitTrader ПЕРЕЗАПУЩЕН"
+            else:
+                textOut = "Перезапуск не требуется"
+        bot.send_message(message.chat.id, text=textOut)
+
+
+
     elif (message.text == "Пользователи"):
         if db.getMemberPermission(message.chat.id) == 1000:
             inform = db.getMembersInfo()
             bot.send_message(message.chat.id, text=inform)
 
-    elif (message.text == "Логи"):
+    elif (message.text == "ЛОГИ"):
         if db.getMemberPermission(message.chat.id) == 1000:
-            inform = db.getLogInfo(30)
+            inform = os.getLogInfo(30)
             bot.send_message(message.chat.id, text=inform)
 
     elif (message.text == "eth_rur"):

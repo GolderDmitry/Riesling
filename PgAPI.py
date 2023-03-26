@@ -1,7 +1,6 @@
 import psycopg2
 import logging
 import time, datetime
-import os
 from settings import DB_NAME, DB_USER, DB_PASSWORD, DB_HOST, LOG_LEVEL
 
 class PgAPI:
@@ -135,6 +134,12 @@ class PgAPI:
         sql = f"UPDATE monitoring SET status = 'FINISH'"
         self.__tableUpdate__(sql)
 
+    def getLastPid(self):
+        sql = "SELECT pid FROM sessions ORDER BY id DESC LIMIT 1"
+        result = self.__tableSelect__(sql)
+        result = result[0][0]
+        return result
+
     def getMemberPermission(self, user_id):
         sql = f"SELECT permission FROM permission WHERE user_id = {user_id}"
         result = self.__tableSelect__(sql)
@@ -204,18 +209,3 @@ class PgAPI:
     def getPairsInfo(self, pairs):
         sql = f"SELECT * FROM pairs WHERE pairs ='{pairs}'"
         return self.__tableSelect__(sql)
-
-
-    def getLogInfo(self, deep):
-        file = os.path.join(os.path.dirname(__file__), '..', 'YobitTrader', 'YobitTrader.log')
-        content = open(file, "r")
-        lines = content.readlines()
-        content.close()
-        i = lines.__len__() - deep
-        text = ""
-
-        while i < lines.__len__():
-            text += lines[i]
-            i += 1
-
-        return text
