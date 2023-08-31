@@ -10,7 +10,8 @@ constructor = Constructor.Constructor()
 @bot.message_handler(commands=['help'])
 def start_message(message):
     bot.send_message(message.chat.id,
-    f"""/start - подписаться на мониторинг
+    f"""
+/start - подписаться на мониторинг
     
 /stop - отменить подписку на мониторинг
 
