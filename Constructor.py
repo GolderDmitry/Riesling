@@ -50,6 +50,16 @@ class Constructor:
             print("Error balance")
         return balance
 
+    # Получить баланс монеты
+    def getBalanseByCoin(self, coin):
+        balance = 0
+        user_info = self.yobit.get_user_info()
+        try:
+            balance = user_info['return']['funds'][coin]
+        except:
+            print("Error balance")
+        return balance
+
     # Получить текущие ордера
     def getOrders(self, pairs):
         result = ""
@@ -70,6 +80,17 @@ class Constructor:
 
         return result
 
+
+    # Выставить ордер
+    def setOrder(self, pair, trade_type, rate, amount):
+        result = None
+        try:
+            result = self.yobit.trade(pair, trade_type, rate, amount)
+        except:
+            print(f"Error {trade_type} {pair} {rate} {amount}")
+        return result
+
+    # Удалить ордер
     def deleteOrder(self, order_id):
         balance = ""
         try:
@@ -77,7 +98,7 @@ class Constructor:
             if result['success'] == 1:
                 coins = result['return']['funds']
                 for key in coins:
-                    if Decimal(coins[key]) > 0.00001:
+                    if Decimal(coins[key]) != "":
                         balance += f"{key}:  {round(Decimal(coins[key]), 8)}\n"
             else:
                 balance = "Incorrect order_id"
