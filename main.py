@@ -11,11 +11,17 @@ constructor = Constructor.Constructor()
 def start_message(message):
     bot.send_message(message.chat.id,
     f"""/start - подписаться на мониторинг
+    
 /stop - отменить подписку на мониторинг
+
 /balance - баланс счета
+
 /orders - выставленные ордера
+
 /del - удалить ордер  (id)
+
 /sell - продать (pair) кол-вл (amount) за (price)
+
 /buy - купить (pair) кол-вл (amount) за (price)
         """)
 
