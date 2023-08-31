@@ -72,6 +72,8 @@ def start_message(message):
 def start_message(message):
     try:
         datas = message.text.split(' ')
+        if datas.__len__() == 1:
+            bot.send_message(message.chat.id, "Miss params (pair) (amount) (price)")
         if datas.__len__() == 2:
             sellCoin = datas[1].split('_')[0]
             bot.send_message(message.chat.id, constructor.getBalanseByCoin(sellCoin))
@@ -92,6 +94,8 @@ def start_message(message):
 def start_message(message):
     try:
         datas = message.text.split(' ')
+        if datas.__len__() == 1:
+            bot.send_message(message.chat.id, "Miss params (pair) (amount) (price)")
         if datas.__len__() == 2:
             sellCoin = datas[1].split('_')[0]
             bot.send_message(message.chat.id, constructor.getBalanseByCoin(sellCoin))
