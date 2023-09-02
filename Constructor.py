@@ -114,9 +114,9 @@ class Constructor:
         result = ""
         for pair in pairs:
             if pair[1] == True:
-                result += f"{pair[0]} [*]"
+                result += f"{pair[0]} [*]\n"
             else:
-                result += f"{pair[0]}"
+                result += f"{pair[0]}\n"
         return result
 
     # Устанавливаем активную пару
