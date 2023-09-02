@@ -83,20 +83,20 @@ class PostgresAPI:
                 last_name       varchar(16),
                 user_id         bigint NOT NULL,
                 created         bigint NOT NULL,
-                changed         bigint NOT NULL
-
+                changed         bigint NOT NULL,
+                bot             varchar(64)
                   );'''
         self.__tableCreate__(sql)
 
-    # Добавляем колонку bot в Permission
-    def __addBotInPermissionTable__(self):
-        sql = '''ALTER TABLE permission ADD COLUMN bot varchar(64);'''
-        self.__tableModification__(sql)
+    # Создаем таблицу с Pairs
+    def __createPairsTable__(self):
+        sql = '''CREATE TABLE pairs (
+                        id              SERIAL PRIMARY KEY,
+                        pair            varchar(16) UNIQUE,
+                        active          boolean
+                          );'''
+        self.__tableCreate__(sql)
 
-    # Создание таблицы Permission
-    def __addBotInPermissionTable__(self):
-        sql = '''ALTER TABLE permission ADD COLUMN bot varchar(64);'''
-        self.__tableUpdate__(sql)
 
     # Добавить пользователя в подписку
     def setPermission(self, first_name, last_name, user_id, created, changed, bot_key):
@@ -125,3 +125,25 @@ class PostgresAPI:
     def deletePermissionById(self, user_id, bot_key):
         sql = f"DELETE FROM permission WHERE user_id = '{user_id}' AND bot = '{bot_key}'"
         return self.__tableUpdate__(sql)
+
+    # Устанавливаем единственную активную Pair
+    def setActivePair(self, pair):
+        result = None
+        if pair != None or pair != "":
+            pair = pair.lower()
+            sql = "UPDATE pairs SET active = false;"
+            self.__tableUpdate__(sql)
+            sql = f"UPDATE pairs SET active = true WHERE pair = {pair};"
+            self.__tableUpdate__(sql)
+            result = pair
+        return result
+
+    # Получаем активную Pair
+    def getActivePair(self):
+        sql = "SELECT pair FROM pairs WHERE active = true"
+        return self.__tableSelect__(sql)
+
+    # Получаем активную Pair
+    def getAllPairs(self):
+        sql = "SELECT pair, active FROM pairs"
+        return self.__tableSelect__(sql)

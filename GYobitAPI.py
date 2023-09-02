@@ -3,9 +3,11 @@ import hmac
 import hashlib
 import requests
 import time
+import os
 from urllib.parse import urlencode
 from settings import Y_KEY, Y_SECRET
 from settings import Y_BASE_URL
+
 
 PUBLIC_API = f"{Y_BASE_URL}/api/3/"
 TRADE_API = f"{Y_BASE_URL}/tapi"
@@ -48,20 +50,18 @@ class GYobitAPI:
             "user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36 Edg/108.0.1462.76"
         }
 
-        response = requests.get(request_url, headers=headers)
-        if response.status_code == 200:
-            try:
-                result = response.json()
-            except ConnectionError as error:
-                print(f"{error}")
-        else:
-            while response.status_code != 200:
-                time.sleep(5)
+        status_code = 0
+
+        try:
+            while status_code != 200:
                 response = requests.get(request_url, headers=headers)
-            try:
+                status_code = response.status_code
+                time.sleep(5)
                 result = response.json()
-            except ConnectionError as error:
-                print(f"{error}")
+        except ConnectionError as error:
+            print(f"ERROR PID ({os.getpid()}): Yobit publick API ({error}) ")
+        except:
+            print(f"ERROR PID ({os.getpid()}): Yobit publick API (JSON) ")
 
         return result
 
@@ -138,30 +138,22 @@ class GYobitAPI:
             "Sign": signature
         }
 
-        response = requests.post(url=TRADE_API, data=params, headers=headers)
-        if response.status_code == 200:
-            if response.content.__len__() > 18:
-                try:
-                    result = response.json()
-                except ConnectionError as error:
-                    print(f"{error}")
-            elif response.content.__len__() <= 18:
-                result = None
-        else:
-            while response.status_code != 200:
-                time.sleep(5)
-                response = requests.post(url=TRADE_API, data=params, headers=headers)
+        status_code = 0
 
-            try:
+        try:
+            while status_code != 200:
+                response = requests.post(url=TRADE_API, data=params, headers=headers)
+                status_code = response.status_code
+                time.sleep(5)
                 if response.text.__len__() > 50:
                     result = response.json()
                     if result['success'] == 0:
+                        print(f"ERROR PID ({os.getpid()}): Yobit trade API ({result['error']}) ")
                         result = None
-                    else:
-                        print(f"JSON read success")
-            except ConnectionError as error:
-                result = None
-                print(f"{error}")
+        except ConnectionError as error:
+            print(f"ERROR PID ({os.getpid()}): Yobit trade API ({error}) ")
+        except:
+            print(f"ERROR PID ({os.getpid()}): Yobit trade API (JSON) ")
 
         return result
 

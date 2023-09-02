@@ -1,7 +1,6 @@
 import datetime
 
 import telebot, Constructor
-from telebot import types
 from settings import BOT_TOKEN, BOT_KEY
 
 bot = telebot.TeleBot(BOT_TOKEN);
@@ -24,6 +23,8 @@ def start_message(message):
 /sell - продать (pair) кол-вл (amount) за (price)
 
 /buy - купить (pair) кол-вл (amount) за (price)
+
+/pair - перечень пар. С параметром (pair) устанавливает активную
         """)
 
 @bot.message_handler(commands=['start'])
@@ -107,6 +108,14 @@ def start_message(message):
             bot.send_message(message.chat.id, constructor.getBalanseByCoin(sellCoin))
     except:
         bot.send_message(message.chat.id, "Miss params (pair) (amount) (price)")
+
+@bot.message_handler(commands=['pair'])
+def start_message(message):
+    try:
+        pair = message.text.split(' ')[1]
+        bot.send_message(message.chat.id, constructor.setActivePair(pair))
+    except:
+        bot.send_message(message.chat.id, constructor.getAllPairs())
 
 if __name__ == '__main__':
     bot.infinity_polling(timeout=10, long_polling_timeout = 5)

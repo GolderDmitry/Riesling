@@ -13,7 +13,8 @@ class Constructor:
         self.yobit = GYobitAPI.GYobitAPI()
         self.db = PostgresAPI.PostgresAPI()
         self.db.__createPermissionTable__()
-        self.db.__addBotInPermissionTable__()
+        self.db.__createPairsTable__()
+
 
     # Добавить пользователя
     def addUser(self, message, bot_key):
@@ -106,3 +107,29 @@ class Constructor:
             balance = "Error return balance"
 
         return balance
+
+    # Получаем все пары
+    def getAllPairs(self):
+        pairs = self.db.getAllPairs()
+        result = ""
+        for pair in pairs:
+            if pair[1] == True:
+                result += f"{pair[0]} [*]"
+            else:
+                result += f"{pair[0]}"
+        return result
+
+    # Устанавливаем активную пару
+    def setActivePair(self, pair):
+        trade_pairs = self.db.getAllPairs()
+        result = ""
+        for trade_pair in trade_pairs:
+            if trade_pair[0] != pair.lower():
+                result = "Incorrect pair"
+            else:
+                if self.db.setActivePair(pair) is not None:
+                    result = f"{pair.upper()} is Active"
+                else:
+                    result = f"{pair.upper()} no Active"
+        return result
+
